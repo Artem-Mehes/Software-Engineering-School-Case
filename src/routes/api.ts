@@ -1,18 +1,69 @@
 import { Router, Request, Response } from "express";
 import axios from "axios";
+import cron from "node-cron";
 import multer from "multer";
 import { supabase } from "../app";
+import sgMail from "@sendgrid/mail";
+
 const upload = multer();
 
 const router = Router();
 
-router.get("/rate", async (_, res: Response<number | { error: string }>) => {
+const getCurrencyRate = async (): Promise<number | null> => {
   try {
-    const response = await axios.get<{ conversion_rate: number }>(
+    const response = await axios.get<ExchangeRateResponse>(
       `${process.env.EXCHANGE_RATE_API_BASE_URL}/${process.env.EXCHANGE_RATE_API_KEY}/pair/USD/UAH`,
     );
-    /*TODO: types?*/
-    res.json(response.data.conversion_rate);
+    return response.data.conversion_rate;
+  } catch (error) {
+    console.error("Error fetching currency rate:", error);
+    return null;
+  }
+};
+
+const sendEmails = async (rate: number) => {
+  const { data: subscribers, error } = await supabase
+    .from("subscriptions")
+    .select("email");
+
+  if (error) {
+    console.error("Error fetching subscribers:", error);
+    return;
+  }
+
+  const msg = {
+    from: "artemmeges@gmail.com",
+    subject: "Daily Currency Rate",
+    text: `The current currency rate from USD to UAH is ${rate}`,
+  };
+
+  for (const subscriber of subscribers) {
+    try {
+      await sgMail.send({ ...msg, to: subscriber.email });
+    } catch (error) {
+      console.error(error);
+
+      // if (error.response) {
+      //   console.error(error.response.body);
+      // }
+    }
+  }
+};
+
+cron.schedule("0 8 * * *", async () => {
+  const rate = await getCurrencyRate();
+  if (rate !== null) {
+    await sendEmails(rate);
+  }
+});
+
+router.get("/rate", async (_, res: Response<number | { error: string }>) => {
+  try {
+    const rate = await getCurrencyRate();
+    if (rate === null) {
+      throw new Error("Failed to fetch currency rate");
+    }
+    res.json(rate);
   } catch (error) {
     /*TODO: better handling?*/
     res.status(500).json({ error: "Failed to fetch currency rate" });
@@ -33,18 +84,18 @@ router.post(
     try {
       const existingSubscription = await supabase
         .from("subscriptions")
-        .select("value", email)
+        .select("email", email)
         .single();
 
       if (existingSubscription.data) {
         return res
           .status(409)
-          .json({ message: existingSubscription.data.value });
+          .json({ message: existingSubscription.data.email });
       } else {
         /*TODO: error*/
         const { error } = await supabase
           .from("subscriptions")
-          .insert([{ value: email }]);
+          .insert([{ email }]);
 
         return res.status(200).json({ message: "E-mail додано" });
       }
