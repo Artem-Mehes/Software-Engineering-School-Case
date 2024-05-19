@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import sgMail from "@sendgrid/mail";
 
-import { Database } from "../database.types";
+import { Database } from "./database.types";
 
 const app = express();
 const port = 3000;
