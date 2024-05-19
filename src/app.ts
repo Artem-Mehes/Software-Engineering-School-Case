@@ -29,3 +29,5 @@ export const supabase = createClient<Database>(
 app.listen(port, () => {
   console.log(`Express app listening at http://localhost:${port}`);
 });
+
+export default app;

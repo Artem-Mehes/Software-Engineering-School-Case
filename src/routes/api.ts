@@ -67,7 +67,6 @@ router.get("/rate", async (_, res: Response<number | { error: string }>) => {
   }
 });
 
-/*TODO: Test that it's email type*/
 router.post(
   "/subscribe",
   upload.none(),
