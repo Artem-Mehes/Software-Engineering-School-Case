@@ -5,6 +5,8 @@ import multer from "multer";
 import { supabase } from "../app";
 import sgMail from "@sendgrid/mail";
 
+import { ExchangeRateResponse } from "./types";
+
 const upload = multer();
 
 const router = Router();
@@ -42,10 +44,6 @@ const sendEmails = async (rate: number) => {
       await sgMail.send({ ...msg, to: subscriber.email });
     } catch (error) {
       console.error(error);
-
-      // if (error.response) {
-      //   console.error(error.response.body);
-      // }
     }
   }
 };
@@ -65,7 +63,6 @@ router.get("/rate", async (_, res: Response<number | { error: string }>) => {
     }
     res.json(rate);
   } catch (error) {
-    /*TODO: better handling?*/
     res.status(500).json({ error: "Failed to fetch currency rate" });
   }
 });
@@ -92,10 +89,7 @@ router.post(
           .status(409)
           .json({ message: existingSubscription.data.email });
       } else {
-        /*TODO: error*/
-        const { error } = await supabase
-          .from("subscriptions")
-          .insert([{ email }]);
+        await supabase.from("subscriptions").insert([{ email }]);
 
         return res.status(200).json({ message: "E-mail додано" });
       }

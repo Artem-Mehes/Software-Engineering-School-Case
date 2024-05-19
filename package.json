@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc && node dist/app.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "build": "tsc",
+    "docker-start": "docker-compose up --build"
   },
   "keywords": [],
   "author": "",
