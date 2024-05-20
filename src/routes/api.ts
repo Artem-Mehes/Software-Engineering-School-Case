@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { body, validationResult } from "express-validator";
 import axios from "axios";
 import cron from "node-cron";
 import multer from "multer";
@@ -70,12 +71,15 @@ router.get("/rate", async (_, res: Response<number | { error: string }>) => {
 router.post(
   "/subscribe",
   upload.none(),
+  body("email").notEmpty().trim().isEmail(),
   async (req: Request<{ email: string }>, res) => {
-    const email = req.body.email;
+    const result = validationResult(req);
 
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+    if (!result.isEmpty()) {
+      return res.status(400).send({ errors: result.mapped() });
     }
+
+    const email = req.body.email;
 
     try {
       const existingSubscription = await supabase

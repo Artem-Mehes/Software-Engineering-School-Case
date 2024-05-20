@@ -21,6 +21,24 @@ describe("Rate API", () => {
     expect(response.body.message).toBe("E-mail додано");
   });
 
+  it("should not subscribe an invalid email", async () => {
+    const response = await request(app)
+      .post("/api/subscribe")
+      .send({ email: "invalid_email" });
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors.email.msg).toBe("Invalid value");
+  });
+
+  it("should not subscribe an empty email", async () => {
+    const response = await request(app)
+      .post("/api/subscribe")
+      .send({ email: "" });
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors.email.msg).toBe("Invalid value");
+  });
+
   it("should not subscribe an already subscribed email", async () => {
     const email = "test@example.com";
 
