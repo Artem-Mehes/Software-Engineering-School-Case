@@ -6,7 +6,6 @@ Express.js application that allows users to subscribe to receive daily emails wi
 
 ## Technologies Used
 
-- Node.js
 - Express.js
 - TypeScript
 - Supabase
@@ -15,4 +14,5 @@ Express.js application that allows users to subscribe to receive daily emails wi
 - Jest
 - Supertest
 - Docker
+- Node cron
 
