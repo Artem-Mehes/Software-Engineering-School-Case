@@ -1,4 +1,4 @@
-# Link to env varibales: https://gist.github.com/Artem-Mehes/69b9dad20f56afafc5390d4114c71f9c
+# Link to env variables: https://gist.github.com/Artem-Mehes/69b9dad20f56afafc5390d4114c71f9c
 
 # Currency Subscription Service
 
